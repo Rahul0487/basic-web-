@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>College_Life - IIT Ropar</title>
+  <script src="https://kit.fontawesome.com/43ac218e57.js" crossorigin="anonymous"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+    body { background:#f0f2f5; }
+
+    /* ══ LOGIN ══════════════════════════════════════════════════════════════ */
+    #loginPage {
+      width:100%; height:100vh;
+      background:linear-gradient(rgba(0,0,50,0.85),rgba(0,0,50,0.85)),
+                 url('background.jpeg') center/cover;
+      display:flex; align-items:center; justify-content:center;
+    }
+    #homePage, #profilePage, #settingsPage { display:none; }
+
+    .form-box {
+      background:#fff; padding:48px 52px 52px;
+      border-radius:12px; width:100%; max-width:430px; text-align:center;
+      box-shadow:0 8px 32px rgba(0,0,0,0.2);
+    }
+    .form-box h1 {
+      font-size:26px; color:#3c00a0; margin-bottom:34px; position:relative;
+    }
+    .form-box h1::after {
+      content:''; width:30px; height:4px; border-radius:3px; background:#3c00a0;
+      position:absolute; bottom:-10px; left:50%; transform:translateX(-50%);
+    }
+    .input-field {
+      background:#eaeaea; margin:10px 0; border-radius:6px;
+      display:flex; align-items:center; overflow:hidden;
+      max-height:54px; transition:max-height 0.4s ease;
+    }
+    .input-field i { margin-left:14px; color:#999; min-width:16px; }
+    .input-field input {
+      width:100%; background:transparent; border:0; outline:0;
+      padding:15px 12px; font-size:14px;
+    }
+    #nameField { max-height:54px; }
+    .btn-row { display:flex; gap:10px; margin-top:16px; }
+    .btn-row button {
+      flex:1; height:38px; border-radius:20px; border:0; cursor:pointer;
+      font-size:14px; font-weight:600; background:#3c00a0; color:#fff;
+      transition:background 0.3s;
+    }
+    .btn-row button.off { background:#eaeaea; color:#555; }
+    #submitBtn {
+      width:100%; margin-top:12px; height:42px; border-radius:20px;
+      border:0; cursor:pointer; font-size:15px; font-weight:600;
+      background:#3c00a0; color:#fff; transition:background 0.3s;
+    }
+    #submitBtn:hover:not(:disabled) { background:#11b1da; }
+    #submitBtn:disabled { background:#aaa; cursor:not-allowed; }
+    #statusMsg {
+      margin-top:10px; font-size:13px; font-weight:600;
+      min-height:18px; display:none;
+    }
+    .hint { text-align:left; font-size:12px; margin-top:6px; color:#777; }
+    .hint a { color:#3c00a0; text-decoration:none; }
+
+    /* ══ SHARED NAV ══════════════════════════════════════════════════════════ */
+    .nav {
+      position:fixed; top:0; left:0; right:0; z-index:999;
+      height:56px; background:#fff; border-bottom:1px solid #ddd;
+      display:flex; align-items:center; padding:0 22px; gap:14px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.07);
+    }
+    .nav .logo { font-size:21px; font-weight:800; color:#3c00a0; min-width:155px; }
+    .nav .srch {
+      flex:1; max-width:440px; background:#f0f2f5; border-radius:20px;
+      height:36px; display:flex; align-items:center; padding:0 14px;
+    }
+    .nav .srch input { width:100%; border:none; outline:none; background:transparent; font-size:14px; }
+    .nav .parea { margin-left:auto; display:flex; align-items:center; gap:10px; }
+    .nav .parea .uname { font-weight:700; color:#3c00a0; font-size:14px; }
+    .nav .parea .lbtn {
+      background:#f0f2f5; border:none; border-radius:8px;
+      padding:6px 13px; cursor:pointer; color:#c00; font-weight:700; font-size:13px;
+    }
+    .nav .parea .lbtn:hover { background:#ffe0e0; }
+
+    /* ══ LAYOUT ══════════════════════════════════════════════════════════════ */
+    .layout { display:flex; margin-top:56px; min-height:calc(100vh - 56px); }
+
+    .sidebar {
+      width:225px; min-width:225px; background:#fff;
+      border-right:1px solid #eee; padding:14px 10px;
+      position:fixed; top:56px; bottom:0; overflow-y:auto;
+    }
+    .mitem {
+      padding:11px 14px; border-radius:10px; font-size:15px; cursor:pointer;
+      margin-bottom:3px; color:#333; transition:background 0.2s;
+      user-select:none;
+    }
+    .mitem:hover { background:#f0f2f5; }
+    .mitem.active { background:#ede7ff; color:#3c00a0; font-weight:700; }
+    .sdiv { border-top:1px solid #eee; margin:12px 0; }
+    .ititle { font-size:14px; font-weight:700; color:#555; padding:0 8px 8px; }
+    .ibox {
+      background:#f7f0ff; border-radius:10px; padding:12px;
+      font-size:13px; color:#666; line-height:1.5;
+    }
+
+    .main { margin-left:225px; flex:1; padding:26px; }
+
+    /* ══ AVATAR ══════════════════════════════════════════════════════════════ */
+    .av {
+      border-radius:50%; background:#3c00a0; color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; flex-shrink:0;
+    }
+    .av.sm { width:42px; height:42px; font-size:17px; }
+    .av.lg { width:78px; height:78px; font-size:30px; }
+
+    /* ══ HOME FEED ═══════════════════════════════════════════════════════════ */
+    .feed { max-width:620px; }
+    .pcreator {
+      background:#fff; border-radius:14px; padding:15px 17px;
+      box-shadow:0 1px 4px rgba(0,0,0,0.09); margin-bottom:18px;
+    }
+    .ptop { display:flex; align-items:center; gap:12px; margin-bottom:11px; }
+    .ptop input {
+      flex:1; background:#f0f2f5; border:none; outline:none;
+      border-radius:20px; padding:10px 16px; font-size:15px;
+    }
+    .ptop input:focus { background:#ede7ff; }
+    .pbot { display:flex; justify-content:flex-end; }
+    .pbot button, .pbtn {
+      background:#3c00a0; color:#fff; border:none; border-radius:20px;
+      padding:8px 22px; font-size:14px; cursor:pointer; font-weight:600;
+    }
+    .pbot button:hover { background:#11b1da; }
+
+    .pcard {
+      background:#fff; border-radius:14px; padding:17px;
+      margin-bottom:15px; box-shadow:0 1px 4px rgba(0,0,0,0.08);
+    }
+    .phead { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
+    .paname { font-weight:700; font-size:15px; color:#1a1a1a; }
+    .ptime  { font-size:12px; color:#aaa; }
+    .ptext  { font-size:15px; color:#333; line-height:1.6; margin-bottom:12px; }
+    .pact   { display:flex; gap:6px; border-top:1px solid #f0f2f5; padding-top:10px; }
+    .pact button {
+      flex:1; background:none; border:none; cursor:pointer;
+      font-size:13px; color:#666; padding:6px; border-radius:8px; font-weight:500;
+    }
+    .pact button:hover { background:#f0f2f5; color:#3c00a0; }
+
+    /* ══ PROFILE ═════════════════════════════════════════════════════════════ */
+    .profcard {
+      background:#fff; border-radius:16px; padding:30px;
+      max-width:580px; box-shadow:0 1px 6px rgba(0,0,0,0.1);
+    }
+    .proftop { display:flex; align-items:center; gap:20px; margin-bottom:26px; }
+    .profinfo h2 { font-size:21px; font-weight:800; color:#1a1a1a; }
+    .profinfo p  { font-size:14px; color:#777; margin-top:3px; }
+    .badge {
+      display:inline-block; background:#ede7ff; color:#3c00a0;
+      border-radius:20px; padding:3px 12px; font-size:12px; font-weight:700;
+      margin-top:6px; margin-right:4px;
+    }
+    .irow {
+      display:flex; align-items:flex-start; gap:10px;
+      padding:13px 0; border-bottom:1px solid #f0f2f5; font-size:15px;
+    }
+    .irow:last-child { border-bottom:none; }
+    .ilabel { color:#999; font-size:13px; min-width:100px; padding-top:1px; }
+    .ival   { color:#1a1a1a; font-weight:600; flex:1; }
+    .biobox {
+      background:#f7f0ff; border-radius:10px; padding:13px;
+      font-size:14px; color:#444; line-height:1.6; width:100%;
+    }
+    .emptybio { color:#bbb; font-style:italic; }
+
+    /* ══ SETTINGS ════════════════════════════════════════════════════════════ */
+    .swrap { max-width:580px; }
+    .scard {
+      background:#fff; border-radius:16px; padding:26px 30px;
+      box-shadow:0 1px 6px rgba(0,0,0,0.08); margin-bottom:18px;
+    }
+    .scard h2 {
+      font-size:17px; font-weight:800; color:#3c00a0;
+      margin-bottom:18px; display:flex; align-items:center; gap:7px;
+    }
+    .fg { margin-bottom:15px; }
+    .fg label { display:block; font-size:13px; font-weight:600; color:#555; margin-bottom:5px; }
+    .fg input, .fg textarea, .fg select {
+      width:100%; background:#f0f2f5; border:2px solid transparent;
+      border-radius:8px; padding:11px 13px; font-size:14px; outline:none;
+      transition:border 0.2s; font-family:inherit;
+    }
+    .fg input:focus, .fg textarea:focus, .fg select:focus {
+      border-color:#3c00a0; background:#fff;
+    }
+    .fg textarea { resize:vertical; min-height:78px; }
+    .sbtn {
+      background:#3c00a0; color:#fff; border:none; border-radius:10px;
+      padding:10px 26px; font-size:14px; font-weight:700; cursor:pointer;
+      transition:background 0.2s;
+    }
+    .sbtn:hover { background:#11b1da; }
+    .smsg { font-size:13px; font-weight:600; margin-top:11px; display:none; }
+    .dbtn {
+      background:#fff; color:#c00; border:2px solid #c00; border-radius:10px;
+      padding:9px 20px; font-size:14px; font-weight:700; cursor:pointer;
+    }
+    .dbtn:hover { background:#c00; color:#fff; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN PAGE ══════════════════ -->
+<div id="loginPage">
+  <div class="form-box">
+    <h1 id="formTitle">Welcome for Sign Up</h1>
+    <div id="nameField" class="input-field">
+      <i class="fa-solid fa-user"></i>
+      <input type="text" id="nameInput" placeholder="Full Name"/>
+    </div>
+    <div class="input-field">
+      <i class="fa-solid fa-envelope"></i>
+      <input type="email" id="emailInput" placeholder="e.g. 2024meb1244@iitrpr.ac.in"/>
+    </div>
+    <div class="input-field">
+      <i class="fa-solid fa-lock"></i>
+      <input type="password" id="passInput" placeholder="Password (min 6 chars)"/>
+    </div>
+    <p class="hint">Forget Password <a href="#">Click Here!</a></p>
+    <p id="statusMsg"></p>
+    <div class="btn-row">
+      <button id="signupBtn">Sign Up</button>
+      <button id="signinBtn" class="off">Sign In</button>
+    </div>
+    <button id="submitBtn">Submit</button>
+  </div>
+</div>
+
+<!-- ══════════════════ HOME PAGE ══════════════════ -->
+<div id="homePage">
+  <nav class="nav">
+    <div class="logo">College_Life</div>
+    <div class="srch"><input type="text" placeholder="🔍 Search..."/></div>
+    <div class="parea">
+      <span class="uname" id="navName">User</span>
+      <button class="lbtn" id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="mitem active" id="mi-home"   onclick="setActive('home')">🏠  Home</div>
+      <div class="mitem"        id="mi-posts"  onclick="setActive('posts')">📝  Posts</div>
+      <div class="mitem"        id="mi-notif"  onclick="setActive('notif')">🔔  Notifications</div>
+      <div class="mitem"        id="mi-prof"   onclick="gotoProfile()">👤  Profile</div>
+      <div class="mitem"        id="mi-sett"   onclick="gotoSettings()">⚙️  Settings</div>
+      <div class="sdiv"></div>
+      <div class="ititle">💡 Today's Idea</div>
+      <div class="ibox">Share something interesting with your college community!</div>
+    </div>
+    <div class="main">
+      <div class="feed">
+        <div class="pcreator">
+          <div class="ptop">
+            <div class="av sm" id="feedAv">U</div>
+            <input type="text" id="postInput" placeholder="What's on your mind?"/>
+          </div>
+          <div class="pbot"><button id="postBtn">📤 Post</button></div>
+        </div>
+        <div id="postsContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PROFILE PAGE ══════════════════ -->
+<div id="profilePage">
+  <nav class="nav">
+    <div class="logo">College_Life</div>
+    <div class="srch"><input type="text" placeholder="🔍 Search..."/></div>
+    <div class="parea">
+      <span class="uname" id="profNavName">User</span>
+      <button class="lbtn" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="mitem" onclick="gotoHome()">🏠  Home</div>
+      <div class="mitem" onclick="gotoHome()">📝  Posts</div>
+      <div class="mitem" onclick="gotoHome()">🔔  Notifications</div>
+      <div class="mitem active">👤  Profile</div>
+      <div class="mitem" onclick="gotoSettings()">⚙️  Settings</div>
+      <div class="sdiv"></div>
+      <div class="ititle">💡 Today's Idea</div>
+      <div class="ibox">Share something interesting with your college community!</div>
+    </div>
+    <div class="main">
+      <div class="profcard">
+        <div class="proftop">
+          <div class="av lg" id="profAv">U</div>
+          <div class="profinfo">
+            <h2 id="profName">—</h2>
+            <p  id="profEmailSub">—</p>
+            <span class="badge" id="profBadgeBranch"></span>
+            <span class="badge" id="profBadgeYear"></span>
+          </div>
+        </div>
+        <div class="irow">
+          <span class="ilabel">📧 Email</span>
+          <span class="ival" id="pEmail">—</span>
+        </div>
+        <div class="irow">
+          <span class="ilabel">🏫 Branch</span>
+          <span class="ival" id="pBranch">—</span>
+        </div>
+        <div class="irow">
+          <span class="ilabel">📅 Year</span>
+          <span class="ival" id="pYear">—</span>
+        </div>
+        <div class="irow">
+          <span class="ilabel">🗓️ Joined</span>
+          <span class="ival" id="pJoined">—</span>
+        </div>
+        <div class="irow" style="flex-direction:column;">
+          <span class="ilabel" style="margin-bottom:8px;">📝 Bio</span>
+          <div class="biobox" id="pBio"><span class="emptybio">No bio added yet.</span></div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="sbtn" onclick="gotoSettings()">✏️ Edit Profile</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ SETTINGS PAGE ══════════════════ -->
+<div id="settingsPage">
+  <nav class="nav">
+    <div class="logo">College_Life</div>
+    <div class="srch"><input type="text" placeholder="🔍 Search..."/></div>
+    <div class="parea">
+      <span class="uname" id="settNavName">User</span>
+      <button class="lbtn" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="mitem" onclick="gotoHome()">🏠  Home</div>
+      <div class="mitem" onclick="gotoHome()">📝  Posts</div>
+      <div class="mitem" onclick="gotoHome()">🔔  Notifications</div>
+      <div class="mitem" onclick="gotoProfile()">👤  Profile</div>
+      <div class="mitem active">⚙️  Settings</div>
+      <div class="sdiv"></div>
+      <div class="ititle">💡 Today's Idea</div>
+      <div class="ibox">Share something interesting with your college community!</div>
+    </div>
+    <div class="main">
+      <div class="swrap">
+
+        <div class="scard">
+          <h2>👤 Edit Profile</h2>
+          <div class="fg">
+            <label>Full Name</label>
+            <input type="text" id="sName" placeholder="Your full name"/>
+          </div>
+          <div class="fg">
+            <label>Branch / Department</label>
+            <select id="sBranch">
+              <option value="">Select Branch</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Chemical Engineering">Chemical Engineering</option>
+              <option value="Mathematics &amp; Computing">Mathematics &amp; Computing</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="HSS">HSS</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Year of Study</label>
+            <select id="sYear">
+              <option value="">Select Year</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+              <option value="5th Year">5th Year</option>
+              <option value="PhD">PhD</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Bio</label>
+            <textarea id="sBio" placeholder="Tell something about yourself..."></textarea>
+          </div>
+          <button class="sbtn" onclick="saveProfile()">💾 Save Changes</button>
+          <p class="smsg" id="profileMsg"></p>
+        </div>
+
+        <div class="scard">
+          <h2>🔒 Change Password</h2>
+          <div class="fg">
+            <label>Current Password</label>
+            <input type="password" id="sCurrPass" placeholder="Enter current password"/>
+          </div>
+          <div class="fg">
+            <label>New Password</label>
+            <input type="password" id="sNewPass" placeholder="New password (min 6 chars)"/>
+          </div>
+          <div class="fg">
+            <label>Confirm New Password</label>
+            <input type="password" id="sConfPass" placeholder="Confirm new password"/>
+          </div>
+          <button class="sbtn" onclick="changePassword()">🔑 Update Password</button>
+          <p class="smsg" id="passMsg"></p>
+        </div>
+
+        <div class="scard">
+          <h2 style="color:#c00;">⚠️ Account</h2>
+          <button class="dbtn" onclick="doLogout()">🚪 Logout</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Config ────────────────────────────────────────────────────────────────
+  var API = "http://localhost:3001";
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  var currentUser = null;
+  var posts       = [];
+  var isSignUp    = true;
+
+  // ── Page switcher ─────────────────────────────────────────────────────────
+  function showPage(name) {
+    document.getElementById("loginPage").style.display    = (name === "login")    ? "flex"  : "none";
+    document.getElementById("homePage").style.display     = (name === "home")     ? "block" : "none";
+    document.getElementById("profilePage").style.display  = (name === "profile")  ? "block" : "none";
+    document.getElementById("settingsPage").style.display = (name === "settings") ? "block" : "none";
+  }
+
+  // ── Login toggles ─────────────────────────────────────────────────────────
+  document.getElementById("signupBtn").onclick = function() {
+    isSignUp = true;
+    document.getElementById("nameField").style.maxHeight = "54px";
+    document.getElementById("formTitle").textContent     = "Welcome for Sign Up";
+    document.getElementById("signupBtn").classList.remove("off");
+    document.getElementById("signinBtn").classList.add("off");
+    document.getElementById("submitBtn").textContent     = "Submit";
+    clearStatus();
+  };
+
+  document.getElementById("signinBtn").onclick = function() {
+    isSignUp = false;
+    document.getElementById("nameField").style.maxHeight = "0";
+    document.getElementById("formTitle").textContent     = "Welcome for Sign In";
+    document.getElementById("signupBtn").classList.add("off");
+    document.getElementById("signinBtn").classList.remove("off");
+    document.getElementById("submitBtn").textContent     = "Sign In";
+    clearStatus();
+  };
+
+  function isCollegeEmail(email) {
+    return email.trim().toLowerCase().endsWith("@iitrpr.ac.in");
+  }
+
+  // ── Submit (login / signup) ───────────────────────────────────────────────
+  document.getElementById("submitBtn").onclick = function() {
+    var name  = document.getElementById("nameInput").value.trim();
+    var email = document.getElementById("emailInput").value.trim();
+    var pass  = document.getElementById("passInput").value.trim();
+
+    if (!email || !pass || (isSignUp && !name)) {
+      return showStatus("❌ Please fill in all fields.", "red");
+    }
+    if (!isCollegeEmail(email)) {
+      return showStatus("❌ Only IIT Ropar emails (@iitrpr.ac.in) are allowed!", "red");
+    }
+
+    var btn = document.getElementById("submitBtn");
+    btn.disabled    = true;
+    btn.textContent = "Please wait...";
+
+    var endpoint = isSignUp ? "/signup" : "/signin";
+    var body     = isSignUp
+      ? { name: name, email: email, password: pass }
+      : { email: email, password: pass };
+
+    fetch(API + endpoint, {
+      method : "POST",
+      headers: { "Content-Type": "application/json" },
+      body   : JSON.stringify(body)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        currentUser = data.user;
+        gotoHome();
+      } else {
+        showStatus("❌ " + data.message, "red");
+      }
+    })
+    .catch(function() {
+      showStatus("❌ Cannot reach server. Run: node server.js", "red");
+    })
+    .finally(function() {
+      btn.disabled    = false;
+      btn.textContent = isSignUp ? "Submit" : "Sign In";
+    });
+  };
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  function gotoHome() {
+    if (!currentUser) return;
+    showPage("home");
+    document.getElementById("navName").textContent  = currentUser.name;
+    document.getElementById("feedAv").textContent   = currentUser.name.charAt(0).toUpperCase();
+    setActive("home");
+    renderPosts();
+  }
+
+  function gotoProfile() {
+    if (!currentUser) return;
+    showPage("profile");
+    document.getElementById("profNavName").textContent = currentUser.name;
+
+    fetch(API + "/user/" + currentUser.id)
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        var u = data.user;
+        // Merge latest data into currentUser
+        currentUser.name   = u.name;
+        currentUser.bio    = u.bio    || "";
+        currentUser.branch = u.branch || "";
+        currentUser.year   = u.year   || "";
+
+        document.getElementById("profAv").textContent         = u.name.charAt(0).toUpperCase();
+        document.getElementById("profName").textContent       = u.name;
+        document.getElementById("profEmailSub").textContent   = u.email;
+        document.getElementById("profBadgeBranch").textContent = u.branch || "Branch not set";
+        document.getElementById("profBadgeYear").textContent  = u.year   || "Year not set";
+        document.getElementById("pEmail").textContent         = u.email;
+        document.getElementById("pBranch").textContent        = u.branch || "—";
+        document.getElementById("pYear").textContent          = u.year   || "—";
+
+        var joined = u.created_at
+          ? new Date(u.created_at).toLocaleDateString("en-IN", { year:"numeric", month:"long", day:"numeric" })
+          : "—";
+        document.getElementById("pJoined").textContent = joined;
+
+        document.getElementById("pBio").innerHTML = u.bio
+          ? u.bio
+          : '<span class="emptybio">No bio added yet.</span>';
+      }
+    })
+    .catch(function() {
+      document.getElementById("profName").textContent = currentUser.name;
+    });
+  }
+
+  function gotoSettings() {
+    if (!currentUser) return;
+    showPage("settings");
+    document.getElementById("settNavName").textContent = currentUser.name;
+
+    // Pre-fill current values
+    document.getElementById("sName").value   = currentUser.name   || "";
+    document.getElementById("sBio").value    = currentUser.bio    || "";
+    document.getElementById("sBranch").value = currentUser.branch || "";
+    document.getElementById("sYear").value   = currentUser.year   || "";
+
+    // Clear password fields
+    document.getElementById("sCurrPass").value = "";
+    document.getElementById("sNewPass").value  = "";
+    document.getElementById("sConfPass").value = "";
+
+    // Hide messages
+    hideMsg("profileMsg");
+    hideMsg("passMsg");
+  }
+
+  // ── Sidebar active state ──────────────────────────────────────────────────
+  function setActive(key) {
+    var ids = ["mi-home", "mi-posts", "mi-notif", "mi-prof", "mi-sett"];
+    ids.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove("active");
+    });
+    var map = { home:"mi-home", posts:"mi-posts", notif:"mi-notif", prof:"mi-prof", sett:"mi-sett" };
+    var target = document.getElementById(map[key]);
+    if (target) target.classList.add("active");
+  }
+
+  // ── Save profile ──────────────────────────────────────────────────────────
+  function saveProfile() {
+    var name   = document.getElementById("sName").value.trim();
+    var bio    = document.getElementById("sBio").value.trim();
+    var branch = document.getElementById("sBranch").value;
+    var year   = document.getElementById("sYear").value;
+
+    if (!name) return showMsg("profileMsg", "❌ Name cannot be empty.", "red");
+
+    fetch(API + "/user/" + currentUser.id, {
+      method : "PUT",
+      headers: { "Content-Type": "application/json" },
+      body   : JSON.stringify({ name:name, bio:bio, branch:branch, year:year })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        currentUser.name   = name;
+        currentUser.bio    = bio;
+        currentUser.branch = branch;
+        currentUser.year   = year;
+        // Update nav names
+        document.getElementById("navName").textContent     = name;
+        document.getElementById("profNavName").textContent = name;
+        document.getElementById("settNavName").textContent = name;
+        showMsg("profileMsg", "✅ Profile updated successfully!", "green");
+      } else {
+        showMsg("profileMsg", "❌ " + data.message, "red");
+      }
+    })
+    .catch(function() {
+      showMsg("profileMsg", "❌ Server error.", "red");
+    });
+  }
+
+  // ── Change password ───────────────────────────────────────────────────────
+  function changePassword() {
+    var curr = document.getElementById("sCurrPass").value.trim();
+    var newp = document.getElementById("sNewPass").value.trim();
+    var conf = document.getElementById("sConfPass").value.trim();
+
+    if (!curr || !newp || !conf)
+      return showMsg("passMsg", "❌ All password fields are required.", "red");
+    if (newp !== conf)
+      return showMsg("passMsg", "❌ New passwords do not match.", "red");
+    if (newp.length < 6)
+      return showMsg("passMsg", "❌ Password must be at least 6 characters.", "red");
+
+    fetch(API + "/user/" + currentUser.id + "/password", {
+      method : "PUT",
+      headers: { "Content-Type": "application/json" },
+      body   : JSON.stringify({ currentPassword: curr, newPassword: newp })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        document.getElementById("sCurrPass").value = "";
+        document.getElementById("sNewPass").value  = "";
+        document.getElementById("sConfPass").value = "";
+        showMsg("passMsg", "✅ Password changed successfully!", "green");
+      } else {
+        showMsg("passMsg", "❌ " + data.message, "red");
+      }
+    })
+    .catch(function() {
+      showMsg("passMsg", "❌ Server error.", "red");
+    });
+  }
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  document.getElementById("logoutBtn").onclick = doLogout;
+
+  function doLogout() {
+    currentUser = null;
+    posts       = [];
+    document.getElementById("nameInput").value  = "";
+    document.getElementById("emailInput").value = "";
+    document.getElementById("passInput").value  = "";
+    clearStatus();
+    showPage("login");
+  }
+
+  // ── Posts ─────────────────────────────────────────────────────────────────
+  document.getElementById("postBtn").onclick = function() {
+    var input = document.getElementById("postInput");
+    var text  = input.value.trim();
+    if (!text || !currentUser) return;
+
+    posts.unshift({
+      author : currentUser.name,
+      initial: currentUser.name.charAt(0).toUpperCase(),
+      text   : text,
+      time   : new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }),
+      likes  : 0
+    });
+    input.value = "";
+    renderPosts();
+  };
+
+  function like(i) {
+    posts[i].likes++;
+    renderPosts();
+  }
+
+  function renderPosts() {
+    var c = document.getElementById("postsContainer");
+    if (!c) return;
+    if (posts.length === 0) {
+      c.innerHTML = '<p style="text-align:center;color:#bbb;margin-top:40px;font-size:15px;">No posts yet. Be the first to post! 🎉</p>';
+      return;
+    }
+    c.innerHTML = posts.map(function(p, i) {
+      return '<div class="pcard">'
+        + '<div class="phead">'
+        + '<div class="av sm">' + p.initial + '</div>'
+        + '<div><div class="paname">' + p.author + '</div>'
+        + '<div class="ptime">' + p.time + '</div></div></div>'
+        + '<div class="ptext">' + p.text + '</div>'
+        + '<div class="pact">'
+        + '<button onclick="like(' + i + ')">👍 Like' + (p.likes > 0 ? ' (' + p.likes + ')' : '') + '</button>'
+        + '<button>💬 Comment</button>'
+        + '<button>🔗 Share</button>'
+        + '</div></div>';
+    }).join("");
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function showStatus(msg, color) {
+    var el = document.getElementById("statusMsg");
+    el.textContent  = msg;
+    el.style.color  = color;
+    el.style.display = "block";
+  }
+  function clearStatus() {
+    var el = document.getElementById("statusMsg");
+    el.style.display = "none";
+    el.textContent   = "";
+  }
+  function showMsg(id, msg, color) {
+    var el = document.getElementById(id);
+    el.textContent  = msg;
+    el.style.color  = color;
+    el.style.display = "block";
+  }
+  function hideMsg(id) {
+    document.getElementById(id).style.display = "none";
+  }
+</script>
+</body>
+</html>
